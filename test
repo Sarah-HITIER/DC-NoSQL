@@ -1,0 +1,111 @@
+Table "account"."users" {
+  "id" BIGSERIAL [pk, not null, increment]
+  "username" VARCHAR(50) [unique, not null]
+  "email" VARCHAR(100) [unique, not null]
+  "password" VARCHAR(50) [not null]
+  "biography" TEXT
+  "profile_img" VARCHAR(200)
+  "registration_date" TIMESTAMP [default: `NOW()`]
+}
+
+Table "gallery"."artworks" {
+  "id" BIGSERIAL [pk, not null, increment]
+  "artist_id" BIGINT [not null, ref: > "account"."users"."id"]
+  "title" VARCHAR(100) [not null]
+  "description" TEXT
+  "views" INT [default: 0]
+  "creation_date" TIMESTAMP [default: `NOW()`]
+}
+
+Table "gallery"."images" {
+  "id" BIGSERIAL [pk, not null, increment]
+  "artwork_id" BIGINT [not null, ref: > "gallery"."artworks"."id"]
+  "url" VARCHAR(200) [not null]
+  "upload_date" TIMESTAMP [default: `NOW()`]
+}
+
+Table "gallery"."likes" {
+  "id" BIGSERIAL [pk, not null, increment]
+  "artwork_id" BIGINT [ref: > "gallery"."artworks"."id"]
+  "user_id" BIGINT [ref: > "account"."users"."id"]
+  "like_date" TIMESTAMP [default: `NOW()`]
+  Indexes {
+    (artwork_id, user_id) [unique]
+  }
+}
+
+Table "gallery"."categories" {
+  "id" BIGSERIAL [pk, not null, increment]
+  "name" VARCHAR(50) [not null]
+  "description" TEXT
+  "creation_date" TIMESTAMP [default: `NOW()`]
+}
+
+Table "gallery"."artwork_categories" {
+  "id" BIGSERIAL [pk, not null, increment]
+  "artwork_id" BIGINT [not null, ref: > "gallery"."artworks"."id"]
+  "category_id" BIGINT [not null, ref: > "gallery"."categories"."id"]
+  Indexes {
+    (artwork_id, category_id) [unique]
+  }
+}
+
+Table "gallery"."tags" {
+"id" BIGSERIAL [pk, not null, increment]
+"name" VARCHAR(50) [not null, unique]
+}
+
+Table "gallery"."artwork_tags" {
+"id" BIGSERIAL [pk, not null, increment]
+"artwork_id" BIGINT [not null, ref: > "gallery"."artworks"."id"]
+"tag_id" BIGINT [not null, ref: > "gallery"."tags"."id"]
+Indexes {
+(artwork_id, tag_id) [unique]
+}
+}
+
+Table "gallery"."comments" {
+  "id" BIGSERIAL [pk, not null, increment]
+  "artwork_id" BIGINT [ref: > "gallery"."artworks"."id"]
+  "user_id" BIGINT [ref: > "account"."users"."id"]
+  "content" TEXT
+  "post_date" TIMESTAMP [default: `NOW()`]
+  "parent_id" BIGINT [ref: > "gallery"."comments"."id"]
+
+}
+
+Table "shop"."products" {
+  "artwork_id" BIGINT [pk, not null, ref: > "gallery"."artworks"."id"]
+  "price" MONEY
+  "is_sold" BOOL [not null, default: false]
+}
+
+Table "shop"."orders" {
+  "id" BIGSERIAL [pk, not null, increment]
+  "user_id" BIGINT [ref: > "account"."users"."id"]
+  "delivery_address" VARCHAR(100) [not null]
+  "status" VARCHAR(20) [not null]
+  "purchase_date" TIMESTAMP [default: `NOW()`]
+}
+
+Table "shop"."products_orders" {
+  "id" BIGSERIAL [pk, not null, increment]
+  "product_id" BIGINT [ref: > "shop"."products"."artwork_id"]
+  "order_id" BIGINT [ref: > "shop"."orders"."id"]
+}
+
+Table "forum"."discussions" {
+"id" BIGSERIAL [pk, not null, increment]
+"name" VARCHAR(50) [not null]
+"description" TEXT
+"creation_date" TIMESTAMP [default: `NOW()`]
+}
+
+Table "forum"."posts" {
+"id" BIGSERIAL [pk, not null, increment]
+"discussion_id" BIGINT [ref: > "forum"."discussions"."id"]
+"user_id" BIGINT [ref: > "account"."users"."id"]
+"content" TEXT
+"post_date" TIMESTAMP [default: `NOW()`]
+}
+
